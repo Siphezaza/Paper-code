@@ -353,9 +353,10 @@ Users can adapt the pipeline to their own data by matching the input format desc
 
 If you use this code, please cite:
 ```setup
-@article{zaza_acousnomaly,
+@article{zaza2025unsupervised,
   title={Unsupervised anomaly detection in large-scale estuarine acoustic telemetry data},
-  author={Zaza, Siphendulwe and Atemkeng, Marcellin and Murray, Taryn S. and Filmalter, John D. and Cowley, Paul D.},
+  author={Zaza, Siphendulwe and Atemkeng, Marcellin and Murray, Taryn S and Filmalter, John David and Cowley, Paul D},
+  journal={arXiv preprint arXiv:2502.01543},
   year={2025}
 }
 ```
