@@ -104,18 +104,35 @@ Saved models and parameter files allow users to reproduce reported results effic
 
 ## 3. Requirements
 
-To install requirements:
+Software Requirements
+This code was developed in a Google Colab environment with Python 3.12.7. Key libraries include:
 
-```setup
-This code was developed in a Google Colab environment with Python Python 3.12.7. Key libraries include:
 - TensorFlow 2.18.0
-- scikit-learn 1.5.1
+- scikit-learn 1.5.1 (note: the notebook pins to 1.2.2 or 1.3.2 in some cells for compatibility—see troubleshooting below)
 - tensorflow / keras
 - pandas, matplotlib, seaborn, dill
-- Windows 11 Enterprise (Version 23H2)
-- 12th Gen Intel® Core™ i7-12700 CPU @ 2.10 GHz,
-- 16 GB RAM
+- Additional: numpy, scipy (for data processing); sympy (for math if needed)
+
+To install, create a requirements.txt file with the following and run pip install -r requirements.txt:
+text
+
 ```
+- tensorflow==2.18.0
+- scikit-learn==1.5.1
+- keras
+- pandas
+- matplotlib
+- seaborn
+- dill
+- numpy==1.24.4
+- scipy==1.10.1
+```
+Tested Environment:
+
+- Windows 11 Enterprise (Version 23H2)
+- 12th Gen Intel® Core™ i7-12700 CPU @ 2.10 GHz
+- 16 GB RAM
+- Google Colab (recommended for quick start, as it handles GPU/TPU if needed for NN-AE training)
 
 ## 4. Step-by-Step Tutorial
 # Step 1: Data Pre-processing
@@ -131,6 +148,19 @@ This step ensures data integrity by:
 - Standardising timestamps and station labels
 
 Only biologically credible detections are retained for modelling.
+
+## Example Code Snippet (full details in notebook section #loading data and models):
+```
+import pandas as pd
+
+# Load raw detections (replace with your file path)
+data_path = 'path/to/your_telemetry_data.txt'  # e.g., '/content/drive/MyDrive/Notebook_with_plots/data_without_augmentation.txt'
+data = pd.read_csv(data_path, sep='\t')
+
+# Remove duplicates and missing values (standardize timestamps)
+data['datetime'] = pd.to_datetime(data['datetime'])  # Ensure datetime format
+data = data.drop_duplicates().dropna(subset=['datetime', 'fishid', 'station'])
+```
 
 # Step 2: Feature Engineering
 
@@ -150,6 +180,13 @@ Telemetry-specific features are derived from raw detections, including:
 
 These features encode movement behaviour rather than raw detections, improving anomaly detection performance.
 
+## Example Code Snippet (full details in notebook section #global functions):
+```
+# Assuming 'data' from Step 1; add features like distance and duration
+data['distance'] = data.groupby('fishid')['lat'].diff().abs()  # Example: distance between detections
+data['duration_in_same_station'] = data.groupby(['fishid', 'station'])['datetime'].diff().dt.total_seconds()
+data.fillna(0, inplace=True)  # Handle initial NaNs
+```
 # Step 3: Resampling Irregular Telemetry Data
 
 Acoustic telemetry data are inherently irregularly sampled due to tag transmission schedules and animal movement.
@@ -164,6 +201,15 @@ To address this, a resampling strategy is applied that:
 
 This produces time series suitable for machine learning and deep learning models.
 
+## Example Code Snippet (full details in notebook section #temporal analysis of movements and detections functions):
+```
+from sklearn.utils import resample
+
+# Resample data (e.g., to median rate; assumes 'data' from previous steps)
+median_rate_seconds = 8  # Or compute from your data
+resampled_data = resample(data[data['Anomaly'] == 0], n_samples=len(data), random_state=42)
+resampled_data['datetime'] = pd.date_range(start=data['datetime'].min(), periods=len(resampled_data), freq=f'{median_rate_seconds}s')
+```
 # Step 4: Unsupervised Model Training
 
 The following unsupervised anomaly detection models are implemented and compared:
@@ -178,6 +224,19 @@ The following unsupervised anomaly detection models are implemented and compared
 
 The NN-AE is trained exclusively on normal detections, learning to reconstruct normal movement patterns. Anomalies are identified through elevated reconstruction errors.
 
+## Example Code Snippet (full details in notebook section #building and fitting the-model; here for NN-AE):
+```
+from tensorflow.keras.models import load_model
+import numpy as np
+
+# Load pre-trained NN-AE model
+model_path = 'autoencoder_model(original_batch_size_128_50epchs3).keras'
+model = load_model(model_path, compile=False)
+
+# Predict on scaled features (assumes X_scaled from preprocessing)
+predictions = model.predict(X_scaled)
+reconstruction_errors = np.mean(np.square(X_scaled - predictions), axis=1)
+```
 # Step 5: Automatic Threshold Optimisation
 
 A key contribution of this work is a data-driven threshold selection algorithm for autoencoders.
@@ -192,6 +251,17 @@ Instead of selecting arbitrary percentiles, the algorithm:
 
 This removes the need for manual threshold tuning.
 
+## Example Code Snippet (full details in notebook section #global functions):
+```
+import numpy as np
+from sklearn.metrics import recall_score
+
+# Compute errors and find optimal threshold (assumes reconstruction_errors from Step 4)
+percentile = 65  # Example from paper
+threshold = np.percentile(reconstruction_errors, percentile)
+y_pred = (reconstruction_errors > threshold).astype(int)
+recall = recall_score(y_true, y_pred)  # Optimize for max recall
+```
 # Step 6: Results and Interpretation
 
 Outputs include:
@@ -239,6 +309,20 @@ Users may need to adjust:
 - Resampling intervals
 
 The overall pipeline remains unchanged.
+
+## Troubleshooting / FAQ
+Here are some common issues and solutions based on testing the workflow:
+
+- Dependency Conflicts: The notebook pins scikit-learn to versions like 1.2.2 or 1.3.2 in some cells (e.g., !pip install scikit-learn==1.2.2). If you encounter version errors (e.g., with numpy or scipy), run the uninstall/reinstall commands from the notebook first. 
+
+- Handling Large Datasets: If memory errors occur during loading or training (e.g., millions of detections), process in chunks with pandas (e.g., pd.read_csv(..., chunksize=100000)). For NN-AE training, reduce batch size (e.g., from 128 to 64) or use Colab's GPU runtime.
+
+- Irregular Timestamps or Resampling Failures: Ensure data is sorted by 'datetime' before resampling. Check for timezone issues with data['datetime'] = pd.to_datetime(data['datetime'], utc=True). If gaps are too large, adjust median_sampling_rate_seconds in the augmentation function.
+
+- Adapting to Non-Estuarine Data: For ocean or river systems, modify features like 'distance' to account for currents (e.g., add velocity). Test on a small subset first and retrain models.
+
+- Model Loading Errors: If .keras or .pkl files fail to load, ensure paths match (e.g., mount Google Drive with drive.mount('/content/drive')). Use import dill for pickle files as in the notebook.
+
 
 ## Relation to the Paper
 
