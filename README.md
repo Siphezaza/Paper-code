@@ -203,6 +203,17 @@ This repository implements the full methodology described in the paper, includin
 
 The notebooks correspond directly to the Methods and Results sections.
 
+## Data Availability and Ethics
+----------------------------
+Due to ethical and permitting restrictions, the raw acoustic telemetry data used in this study are not publicly available. Data will be made available on request.
+The repository therefore focuses on providing:
+- fully reproducible code,
+- clear data format specifications, and
+- example workflows that can be applied to other telemetry datasets.
+
+Users can adapt the pipeline to their own data by matching the input format described in the preprocessing notebooks.
+
+
 ## Citation
 
 If you use this code, please cite:
