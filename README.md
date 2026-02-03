@@ -51,6 +51,37 @@ The AcousNomaly pipeline consists of the following stages:
 
 Each stage is implemented explicitly and documented in the notebooks provided.
 
+Quick Start
+-----------
+For users who want to reproduce the main results with minimal setup, this repository provides a fully executable workflow in Google Colab.
+
+1. **Open the repository in Google Colab**  
+   Clone or upload the GitHub repository into a Google Colab environment.
+
+2. **Run the main analysis notebook** (Notebook with plots for the paper (2).ipynb)  
+   Execute the notebook:
+This notebook implements the complete end-to-end pipeline used in the paper, including:
+- Data loading and preprocessing  
+- Telemetry-specific feature engineering  
+- Resampling of irregular detection time series  
+- Training and evaluation of unsupervised anomaly detection models  
+- Generation of figures and performance metrics reported in the manuscript  
+
+3. **Use pre-trained models and optimised parameters (optional)**  
+To reproduce results without retraining, the repository includes saved models and optimised parameters:
+- `autoencoder_model(original_batch_size_128_50epchs3).keras`
+- `best_isolation_forest_model_original.pkl`
+- `best_lof_params_original.pkl`
+- `best_dbscan_params_90s.pkl`
+- `dbscan_results_90s.pkl`
+
+These files allow users to directly apply trained models to new telemetry datasets or to reproduce the reported results efficiently.
+
+4. **Inspect outputs and figures**  
+All figures used in the paper (including time-series visualisations, confusion matrices, and model comparisons) are generated within the notebook.
+
+Each step of the notebook is clearly commented and explicitly linked to the corresponding sections of the paper, enabling both reproducibility and methodological transparency.
+
 ## 3. Requirements
 
 To install requirements:
