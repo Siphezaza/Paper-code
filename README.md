@@ -85,26 +85,20 @@ Each step of the notebook is clearly commented and explicitly linked to the corr
 ## Repository Structure
 
 The repository is organised to support both full reproducibility of the paper results and easy adaptation to new acoustic telemetry datasets.
-├── Notebook with plots for the paper (2).ipynb
-│ Main end-to-end analysis notebook used to generate the results and figures
-│ reported in the paper.
-│
-├── autoencoder_model(original_batch_size_128_50epchs3).keras
-│ Trained neural network autoencoder (NN-AE).
-│
-├── best_isolation_forest_model_original.pkl
-│ Pre-trained Isolation Forest model.
-│
-├── best_lof_params_original.pkl
-│ Optimised Local Outlier Factor parameters.
-│
-├── best_dbscan_params_90s.pkl
-│ Optimised DBSCAN parameters for the 90 s augmented dataset.
-│
-├── dbscan_results_90s.pkl
-│ Stored DBSCAN anomaly detection results.
-│
-└── README.md
+─ Notebook with plots for the paper (2).ipynb
+(Main end-to-end analysis notebook used to generate the results and figures reported in the paper
+
+─ autoencoder_model(original_batch_size_128_50epchs3).keras (Trained neural network autoencoder (NN-AE)).
+
+─ best_isolation_forest_model_original.pkl (Pre-trained Isolation Forest model).
+
+─ best_lof_params_original.pkl (Optimised Local Outlier Factor parameters).
+
+─ best_dbscan_params_90s.pkl (Optimised DBSCAN parameters for the 90 s augmented dataset).
+
+─ dbscan_results_90s.pkl (Stored DBSCAN anomaly detection results).
+
+─ README.md
 Extended tutorial-style documentation for the repository.
 Saved models and parameter files allow users to reproduce reported results efficiently, while the main notebook provides a transparent implementation of the full methodology.
 
